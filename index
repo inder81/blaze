@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock SMA Status</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock SMA Status</h1>
+    <label for="apiKey">API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter your API key">
+    <button onclick="startFetchingData()">Start</button>
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>Stock Symbol</th>
+                <th>Above 9 SMA</th>
+                <th>Above 12 SMA</th>
+                <th>Above 20 SMA</th>
+                <th>Above 50 SMA</th>
+                <th>Above 100 SMA</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const stockSymbols = [
+            "AAPL", "GOOGL", "MSFT", "AMZN", "FB", // Example symbols
+            // Add the remaining 195 stock symbols here
+        ];
+
+        function createTableRows() {
+            const tbody = document.querySelector("#stockTable tbody");
+            stockSymbols.forEach(symbol => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${symbol}</td>
+                    <td id="${symbol}-9"></td>
+                    <td id="${symbol}-12"></td>
+                    <td id="${symbol}-20"></td>
+                    <td id="${symbol}-50"></td>
+                    <td id="${symbol}-100"></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function fetchStockData(symbol, apiKey) {
+            const url = `https://api.dhan.co/some_endpoint?symbol=${symbol}&apikey=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const data = await response.json();
+                document.getElementById(`${symbol}-9`).textContent = data.sma9;
+                document.getElementById(`${symbol}-12`).textContent = data.sma12;
+                document.getElementById(`${symbol}-20`).textContent = data.sma20;
+                document.getElementById(`${symbol}-50`).textContent = data.sma50;
+                document.getElementById(`${symbol}-100`).textContent = data.sma100;
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        }
+
+        function startFetchingData() {
+            const apiKey = document.getElementById("apiKey").value;
+            if (!apiKey) {
+                alert("Please enter an API key.");
+                return;
+            }
+
+            setInterval(() => {
+                stockSymbols.forEach(symbol => {
+                    fetchStockData(symbol, apiKey);
+                });
+            }, 1000); // Fetch data every second
+        }
+
+        document.addEventListener("DOMContentLoaded", createTableRows);
+    </script>
+</body>
+</html>
